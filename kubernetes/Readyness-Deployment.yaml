@@ -1,35 +1,19 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: Pod
 metadata:
-  name: readiness-example
-  labels:
-    app: healthcheck
+  name: readyness-example
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: healthcheck
-  template:
-    metadata:
-      labels:
-        app: healthcheck
-    spec:
-      containers:
-        - name: healthcheck
-          image: localhost:5000/healthcheck
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 40
-            timeoutSeconds: 2
-            periodSeconds: 3
-            failureThreshold: 2
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 100
-            timeoutSeconds: 2
-            periodSeconds: 8
-            failureThreshold: 1
+  containers:
+    - image: localhost:5000/healthcheck:latest
+      name: healthcheck
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+      livenessProbe:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        initialDelaySeconds: 20              # ==> Zeit bis zur ersten Prüfung
+        failureThreshold: 1                 # ==> Anzahl der Fehler
+        timeoutSeconds: 2                   # ==> Timeout liegt bei 1 s
+        periodSeconds: 8
